@@ -1,0 +1,217 @@
+/* admin.css – Styles for dashboard, forms, and list views */
+
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: #f9fafb;
+  margin: 0;
+  padding: 0;
+  color: #1f2937;
+}
+
+/* Layout */
+.max-w-6xl { max-width: 80rem; }
+.mx-auto { margin-left: auto; margin-right: auto; }
+.px-4 { padding-left: 1rem; padding-right: 1rem; }
+.py-6 { padding-top: 1.5rem; padding-bottom: 1.5rem; }
+
+/* Hero gradient */
+.hero-grad {
+  background: linear-gradient(90deg, #0f172a 0%, #1e293b 100%);
+  color: white;
+}
+
+/* Cards */
+.card {
+  background: white;
+  border-radius: 0.5rem;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  padding: 1rem;
+  border: 1px solid #e5e7eb;
+}
+
+/* Form styles */
+label {
+  display: block;
+  margin-bottom: 0.25rem;
+  font-weight: 500;
+}
+.form-input, .form-select, textarea,
+input[type="text"], input[type="date"], input[type="datetime-local"], input[type="email"], select {
+  width: 100%;
+  padding: 0.5rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 0.375rem;
+  font-size: 0.875rem;
+  background-color: white;
+}
+.form-input:focus, .form-select:focus, textarea:focus,
+input[type="text"]:focus, input[type="date"]:focus, input[type="datetime-local"]:focus, input[type="email"]:focus, select:focus {
+  border-color: #3b82f6;
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+}
+
+/* Buttons */
+.btn-primary {
+  background-color: #2563eb;
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 0.375rem;
+  border: none;
+  font-weight: 600;
+  cursor: pointer;
+}
+.btn-primary:hover { background-color: #1d4ed8; }
+
+.btn-secondary {
+  background-color: #e5e7eb;
+  color: #111827;
+  padding: 0.5rem 1rem;
+  border-radius: 0.375rem;
+  border: none;
+  font-weight: 600;
+  cursor: pointer;
+}
+.btn-secondary:hover { background-color: #d1d5db; }
+
+/* Chips */
+.chip {
+  display: inline-block;
+  background-color: #e2e8f0;
+  border-radius: 9999px;
+  padding: 0.25rem 0.75rem;
+  font-size: 0.875rem;
+}
+
+/* Table */
+.table { width: 100%; border-collapse: collapse; }
+.table th, .table td {
+  padding: 0.75rem;
+  border-bottom: 1px solid #e5e7eb;
+  text-align: left;
+}
+.table thead { background-color: #f1f5f9; }
+
+/* KPI Cards */
+.kpi {
+  padding: 1rem;
+  border-radius: 0.75rem;
+  color: white;
+  transition: box-shadow .2s ease, transform .1s ease;
+  cursor: pointer;
+}
+.kpi:hover { box-shadow: 0 8px 24px rgba(0,0,0,0.12); transform: translateY(-1px); }
+
+.kpi--blue  { background: linear-gradient(135deg, #3b82f6, #2563eb); }
+.kpi--amber { background: linear-gradient(135deg, #f59e0b, #d97706); }
+.kpi--rose  { background: linear-gradient(135deg, #f43f5e, #be123c); }
+
+.kpi-badge {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  opacity: 0.9;
+  margin-bottom: .25rem;
+}
+
+/* Sparkline (tiny chart) */
+.sparkline .line { fill: none; stroke: #0ea5e9; stroke-width: 2; }
+.sparkline .area { fill: rgba(14,165,233,0.12); }
+.sparkline .axis { font-size: 10px; fill: #334155; }
+
+/* Signature box (if used by id) */
+#sig-canvas {
+  border: 2px dashed #94a3b8;
+  border-radius: 0.375rem;
+  background: #f8fafc;
+  width: 100%;
+  height: 200px;
+  cursor: crosshair;
+}
+
+/* Lightbox image gallery */
+.photo-thumb {
+  cursor: pointer;
+  max-width: 100px;
+  border: 2px solid #e2e8f0;
+  border-radius: 0.375rem;
+  margin-right: 0.5rem;
+  margin-bottom: 0.5rem;
+  transition: transform 0.2s;
+}
+.photo-thumb:hover { transform: scale(1.05); }
+
+/* Modal Lightbox */
+.lightbox {
+  position: fixed;
+  z-index: 9999;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.85);
+  display: none; /* set to flex when opened via JS */
+  align-items: center;
+  justify-content: center;
+}
+.lightbox img {
+  max-width: 90%;
+  max-height: 90%;
+  border-radius: 0.5rem;
+}
+.lightbox.open { display: flex; }
+.lightbox-close {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  font-size: 2rem;
+  color: white;
+  cursor: pointer;
+}
+
+/* Tag-input (optional manual recipient UI) */
+.tag-input {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+  padding: 0.5rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 0.375rem;
+  background: white;
+}
+.tag {
+  background: #cbd5e1;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.375rem;
+  font-size: 0.75rem;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+.tag .remove { font-weight: bold; cursor: pointer; }
+.tag-input input {
+  border: none;
+  outline: none;
+  flex: 1;
+  font-size: 0.875rem;
+  min-width: 100px;
+}
+
+/* Utilities */
+.text-sm { font-size: 0.875rem; }
+.text-2xl { font-size: 1.5rem; }
+.text-3xl { font-size: 1.875rem; }
+.font-bold { font-weight: 700; }
+.space-y-6 > * + * { margin-top: 1.5rem; }
+.space-y-4 > * + * { margin-top: 1rem; }
+
+/* Missing variant used on dashboard */
+.kpi--cyan {
+  background: linear-gradient(135deg, #06b6d4, #0891b2); /* cyan → teal */
+  color: #fff;
+}
+
+.kpi--emerald { background: linear-gradient(135deg,#10b981,#059669); color:#fff; }
+.kpi--emerald {
+  background: linear-gradient(135deg, #34d399, #059669);
+  color: white;
+}
+
