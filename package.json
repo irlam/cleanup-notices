@@ -1,0 +1,16 @@
+{
+  "name": "site-documents-checks",
+  "private": true,
+  "scripts": {
+    "test": "node --test tests/offline-queue.test.cjs",
+    "test:browser": "node tests/offline-browser.test.cjs",
+    "build:offline": "python3 scripts/build-offline-shell.py",
+    "build:css": "tailwindcss -i scripts/utilities.css -o assets/css/utilities.css --content './**/*.{php,html,js}' --minify"
+  },
+  "devDependencies": {
+    "fake-indexeddb": "6.2.5",
+    "jspdf": "4.2.1",
+    "playwright": "1.62.1",
+    "tailwindcss": "3.4.17"
+  }
+}

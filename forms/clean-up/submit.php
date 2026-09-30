@@ -2,8 +2,21 @@
 // forms/clean-up/submit.php
 declare(strict_types=1);
 
+require_once __DIR__ . '/../../includes/offline_sync.php';
+$syncRequest = ($_SERVER['HTTP_X_OFFLINE_SUBMISSION'] ?? '') === '1';
 session_start();
-if (!isset($_SESSION['user'])) { header('Location: /index.php'); exit; }
+if (!isset($_SESSION['user'])) {
+  if ($syncRequest) offline_reply(401, ['success'=>false,'message'=>'Sign in as the notice author to synchronise.']);
+  header('Location: /index.php'); exit;
+}
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') offline_reply(405, ['success'=>false,'message'=>'POST required.']);
+if ($syncRequest && (string)($_POST['offline_owner'] ?? '') !== (string)$_SESSION['user'])
+  offline_reply(403, ['success'=>false,'message'=>'Sign in as the user who created this notice.']);
+if (empty($_SESSION['offline_csrf']) || !hash_equals((string)$_SESSION['offline_csrf'], (string)($_POST['csrf_token'] ?? '')))
+  offline_reply(403, ['success'=>false,'message'=>'Refresh your sign-in before synchronising.']);
+$clientId = (string)($_POST['client_submission_id'] ?? '');
+if (!preg_match('/^[a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}$/', $clientId))
+  offline_reply(422, ['success'=>false,'message'=>'Missing submission ID, or the upload exceeded the server limit.']);
 
 date_default_timezone_set('Europe/London');
 
@@ -47,27 +60,42 @@ if ($extraEmail && filter_var($extraEmail, FILTER_VALIDATE_EMAIL)) {
   setcookie('extra_emails', implode(',', $existing), time() + (365*24*60*60), '/');
 }
 
-// ------- Save unique recipients to DB (for future autocomplete) -------
+// Detect PHP upload/input limits rather than silently accepting partial photos.
+if ($syncRequest) {
+  $actualPhotos = !empty($_FILES['photos']['name'][0]) ? count($_FILES['photos']['name']) : 0;
+  if ((int)($_POST['offline_photo_count'] ?? -1) !== $actualPhotos ||
+      (int)($_POST['offline_annotation_count'] ?? -1) !== count($_POST['annotate'] ?? []))
+    offline_reply(422, ['success'=>false,'message'=>'The server did not receive every photo or annotation. Reduce the number or size of attachments and retry.']);
+}
+// Validate before saving any record or receipt.
+$recipients = array_values(array_unique(array_filter($recipients, static fn($email) => is_string($email) && filter_var($email, FILTER_VALIDATE_EMAIL))));
+if (!$site_name || !$location || !$issued_at || !$issued_to || !$issued_by || !$description || empty($recipients) || !$signature) {
+  offline_reply(422, ['success'=>false,'message'=>'Complete the required fields, signature and recipients.']);
+}
+foreach ([$issued_at, $deadline_at] as $date) {
+  if ($date === '') continue;
+  $format = strlen($date) === 16 ? '!Y-m-d\TH:i' : '!Y-m-d\TH:i:s';
+  $parsed = DateTimeImmutable::createFromFormat($format, $date);
+  $dateErrors = DateTimeImmutable::getLastErrors();
+  if (!$parsed || ($dateErrors && ($dateErrors['warning_count'] || $dateErrors['error_count'])))
+    offline_reply(422, ['success'=>false,'message'=>'Invalid date or time.']);
+}
+$filesDir = '';
 try {
-  $insR = $pdo->prepare("INSERT IGNORE INTO recipient_emails (email) VALUES (?)");
-  foreach ($recipients as $email) {
-    if (filter_var($email, FILTER_VALIDATE_EMAIL)) {
-      $insR->execute([$email]);
-    }
+  offline_schema($pdo);
+  $payloadHash = offline_payload_hash($_POST, $_FILES);
+  $receipt = offline_receipt($pdo, (string)$_SESSION['user'], $clientId);
+  if ($receipt) {
+    if (!hash_equals($receipt['payload_hash'], $payloadHash)) offline_reply(409, ['success'=>false,'message'=>'This saved submission ID was already used for different data.']);
+    $notice_id = (int)$receipt['notice_id'];
+    $pdfPath = __DIR__ . '/../../uploads/cleanup/'.$notice_id.'/clean-up-notice-'.$notice_id.'.pdf';
+    goto SEND_NOTICE_MAIL;
   }
-} catch (Throwable $e) {
-  error_log('submit.php recipient_emails insert error: '.$e->getMessage());
-}
-
-// ------- Basic validation -------
-if (!$site_name || !$location || !$issued_at || !$issued_to || !$issued_by || !$description || empty($recipients)) {
-  http_response_code(422);
-  echo 'Missing required fields. <a href="form.php">Back</a>';
-  exit;
-}
-
+  // The receipt and notice commit together, including attachment paths and PDF.
+  $pdo->beginTransaction();
+  $claim = $pdo->prepare('INSERT INTO notice_submission_receipts (user_name, client_id, payload_hash, recipient_count) VALUES (?, ?, ?, ?)');
+  $claim->execute([$_SESSION['user'], $clientId, $payloadHash, count($recipients)]);
 // ------- Insert main record -------
-try {
   $stmt = $pdo->prepare("
     INSERT INTO cleanup_notices
       (user_name, site_name, location, issued_at, issued_to, issued_by, reason, description, urgency, deadline_at, completed_ok, mcgoff_clear, created_at)
@@ -76,23 +104,14 @@ try {
   ");
   $stmt->execute([
     $_SESSION['user'], $site_name, $location, $issued_at, $issued_to,
-    $issued_by, $reason, $description, $urgency, $deadline_at,
+    $issued_by, $reason, $description, $urgency, $deadline_at ?: null,
     $completed_ok, $mcgoff_clear
   ]);
   $notice_id = (int)$pdo->lastInsertId();
-} catch (Throwable $e) {
-  http_response_code(500);
-  echo 'DB insert failed.';
-  error_log('submit.php insert error: '.$e->getMessage());
-  exit;
-}
-
 // ------- Prepare upload directory -------
 $filesDir = __DIR__ . '/../../uploads/cleanup/' . $notice_id;
 if (!is_dir($filesDir) && !@mkdir($filesDir, 0775, true)) {
-  http_response_code(500);
-  echo 'Failed to create upload directory.';
-  exit;
+  throw new RuntimeException('Unable to create the upload directory.');
 }
 
 // ------- Process standard file uploads (photos[]) -------
@@ -105,10 +124,9 @@ if (!empty($_FILES['photos']['name'][0])) {
     if (!$orig || !$tmp) continue;
 
     // Convert anything (incl. HEIC) -> rotated, flattened JPEG
-    $saved = process_uploaded_image($tmp, $filesDir, $orig, 2000, 2000, 82);
-    if ($saved) {
-      $photoPaths[] = $saved; // absolute path
-    }
+    $saved = process_uploaded_image($tmp, $filesDir, 'photo_'.$i.'_'.bin2hex(random_bytes(4)).'_'.$orig, 2000, 2000, 82);
+    if (!$saved) throw new InvalidArgumentException('A photo could not be processed. Use JPEG or PNG, then retry.');
+    $photoPaths[] = $saved;
   }
 }
 
@@ -118,9 +136,8 @@ if (!empty($_POST['annotate']) && is_array($_POST['annotate'])) {
     $dataUrl = trim((string)$dataUrl);
     if ($dataUrl === '') continue;
     $saved = process_base64_image($dataUrl, $filesDir, 'annotated_'.$idx, 2000, 2000, 82);
-    if ($saved) {
-      $photoPaths[] = $saved;
-    }
+    if (!$saved) throw new InvalidArgumentException('An annotated image could not be processed.');
+    $photoPaths[] = $saved;
   }
 }
 
@@ -130,7 +147,7 @@ if ($signature) {
   $savedSig = process_base64_image($signature, $filesDir, 'signature', 1200, 1200, 85);
   if ($savedSig) {
     $sigAbs = $savedSig;
-  }
+  } else throw new InvalidArgumentException('The signature could not be processed.');
 }
 
 // ------- Update record with signature path (PDF path added later) -------
@@ -138,8 +155,7 @@ try {
   $upd = $pdo->prepare("UPDATE cleanup_notices SET signature_path = ? WHERE id = ?");
   $upd->execute([$sigAbs ?: null, $notice_id]);
 } catch (Throwable $e) {
-  // Non-fatal
-  error_log('submit.php signature update error: '.$e->getMessage());
+  throw $e;
 }
 
 // ------- Save photo rows to cleanup_photos -------
@@ -150,8 +166,7 @@ if (!empty($photoPaths)) {
       $ins->execute([$notice_id, $p]);
     }
   } catch (Throwable $e) {
-    // Non-fatal
-    error_log('submit.php photos insert error: '.$e->getMessage());
+    throw $e;
   }
 }
 
@@ -161,12 +176,13 @@ try {
   define('PDF_CAPTURE_MODE', true);
   $NOTICE_ID = $notice_id;
 
+  $bufferLevel = ob_get_level();
   ob_start();
   // pdf.php will echo the PDF bytes when PDF_CAPTURE_MODE is true
   include __DIR__ . '/pdf.php';
   $pdfBytes = ob_get_clean();
 
-  if (!$pdfBytes || strlen($pdfBytes) < 50) {
+  if (!$pdfBytes || strlen($pdfBytes) < 50 || strncmp($pdfBytes, '%PDF-', 5) !== 0) {
     throw new RuntimeException('Empty PDF output.');
   }
   if (file_put_contents($pdfPath, $pdfBytes) === false) {
@@ -178,45 +194,58 @@ try {
   $upd2->execute([$pdfPath, $notice_id]);
 
 } catch (Throwable $e) {
-  // If PDF failed, continue but log it; email step will skip attach if missing
-  error_log('submit.php PDF generation error: '.$e->getMessage());
-  $pdfPath = '';
+  while (ob_get_level() > ($bufferLevel ?? ob_get_level())) ob_end_clean();
+  throw $e;
 }
 
-// ------- Email recipients with PDF attachment -------
-$rc = count($recipients);
-if ($rc > 0) {
-  $subject = "Clean-Up Notice – {$site_name}";
-  $body    = "
-    <p>A new Clean-Up Notice has been submitted.</p>
-    <p>
-      <strong>Site:</strong> " . esc($site_name) . "<br>
-      <strong>Issued To:</strong> " . esc($issued_to) . "<br>
-      <strong>Urgency:</strong> " . esc($urgency) . "<br>" .
-      ($deadline_at ? "<strong>Deadline:</strong> " . esc($deadline_at) . "<br>" : "") .
-    "</p>
-    <p>The full notice is attached as a PDF.</p>
-  ";
-
-  try {
-    if ($pdfPath && is_readable($pdfPath)) {
-      send_mail($recipients, $subject, $body, [
-        ['path' => $pdfPath, 'name' => basename($pdfPath)]
-      ]);
-    } else {
-      // Fallback: send without attachment
-      send_mail($recipients, $subject, $body);
-    }
-  } catch (Throwable $e) {
-    error_log('submit.php email error: '.$e->getMessage());
+$receiptUpdate = $pdo->prepare('UPDATE notice_submission_receipts SET notice_id = ? WHERE user_name = ? AND client_id = ?');
+$receiptUpdate->execute([$notice_id, $_SESSION['user'], $clientId]);
+$pdo->commit();
+} catch (Throwable $error) {
+  if ($pdo->inTransaction()) $pdo->rollBack();
+  if ($filesDir !== '') offline_cleanup_directory($filesDir);
+  // Concurrent replays converge on the already committed receipt.
+  $receipt = isset($payloadHash) ? offline_receipt($pdo, (string)$_SESSION['user'], $clientId) : null;
+  if ($receipt && !hash_equals($receipt['payload_hash'], $payloadHash)) offline_reply(409, ['success'=>false,'message'=>'This submission ID already belongs to different notice data.']);
+  if ($receipt && hash_equals($receipt['payload_hash'], $payloadHash)) {
+    $notice_id = (int)$receipt['notice_id'];
+    $pdfPath = __DIR__ . '/../../uploads/cleanup/'.$notice_id.'/clean-up-notice-'.$notice_id.'.pdf';
+    goto SEND_NOTICE_MAIL;
   }
+  error_log('Notice sync: '.$error->getMessage());
+  offline_reply($error instanceof InvalidArgumentException ? 422 : 503, ['success'=>false,'message'=>
+    $error instanceof InvalidArgumentException ? $error->getMessage() : 'Unable to save this notice yet. Your device will retain it and retry.']);
 }
 
-// ------- Redirect to success page -------
-$qs = http_build_query([
-  'id'   => $notice_id,
-  'sent' => 1,
-  'rc'   => $rc
-]);
-header("Location: success.php?{$qs}");
+SEND_NOTICE_MAIL:
+// Release the session lock while SMTP runs so other tabs can refresh or sign in.
+if (session_status() === PHP_SESSION_ACTIVE) session_write_close();
+// Only the request that claims pending mail may send. Replays never send twice.
+// A crash during SMTP delivery is explicitly reported as uncertain.
+$claimMail = $pdo->prepare("UPDATE notice_submission_receipts SET mail_state = 'sending' WHERE user_name = ? AND client_id = ? AND mail_state = 'pending'");
+$claimMail->execute([$_SESSION['user'], $clientId]);
+if ($claimMail->rowCount() === 1) {
+  $mailState = 'failed';
+  try {
+    $subject = "Clean-Up Notice – {$site_name}";
+    $body = '<p>A new Clean-Up Notice has been submitted.</p><p><strong>Site:</strong> '.esc($site_name).
+      '<br><strong>Issued To:</strong> '.esc($issued_to).'<br><strong>Urgency:</strong> '.esc($urgency).'</p><p>The full notice is attached as a PDF.</p>';
+    $result = send_mail($recipients, $subject, $body, [['path'=>$pdfPath,'name'=>basename($pdfPath)]]);
+    $mailState = !empty($result['ok']) ? 'sent' : 'failed';
+  } catch (Throwable $error) {
+    error_log('Notice email: '.$error->getMessage());
+    $mailState = 'uncertain';
+  }
+  $markMail = $pdo->prepare('UPDATE notice_submission_receipts SET mail_state = ? WHERE user_name = ? AND client_id = ?');
+  $markMail->execute([$mailState, $_SESSION['user'], $clientId]);
+}
+// Remember valid recipients only after the notice is saved.
+try {
+  $insR = $pdo->prepare('INSERT IGNORE INTO recipient_emails (email) VALUES (?)');
+  foreach ($recipients as $email) $insR->execute([$email]);
+} catch (Throwable $error) { error_log('Recipient save: '.$error->getMessage()); }
+$receipt = offline_receipt($pdo, (string)$_SESSION['user'], $clientId);
+if ($syncRequest) offline_reply(200, offline_receipt_body($receipt));
+$qs = http_build_query(['id'=>$notice_id, 'sent'=>$receipt['mail_state'] === 'sent' ? 1 : 0, 'rc'=>count($recipients)]);
+header('Location: success.php?'.$qs);
 exit;

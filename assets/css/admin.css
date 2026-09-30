@@ -360,3 +360,14 @@ body.docs-app .docs-form-page { margin: 28px auto; max-width: 860px; background:
 .docs-install summary { cursor:pointer; color:var(--secondary-color); }
 .docs-install p { margin:10px 0; }
 @media(max-width:400px){ .docs-login-brand{font-size:20px;gap:12px}.docs-login-brand img{width:64px;height:64px} }
+.offline-toolbar{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:10px;padding:20px;font-size:13px}
+.offline-actions{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0}
+.offline-item{padding:18px 0;border-bottom:1px solid var(--border-color);overflow-wrap:anywhere}
+.offline-item h3{font-weight:600;font-size:16px}
+.offline-photos{display:flex;flex-wrap:wrap;gap:10px;margin-top:12px}
+.offline-photos img{height:100px;max-width:160px;object-fit:contain;background:#fff;border-radius:8px}
+.offline-error{color:#fca5a5;margin:8px 0}
+#formSaveStatus{font-size:13px;color:#67e8f9;margin:12px 0}
+.docs-form-page input[type="color"],.docs-form-page input[type="range"]{width:100px;min-height:34px}
+@media(min-width:900px) and (max-width:1099px){.docs-desktop,.docs-username{display:none}.docs-menu{display:block}.docs-mobile{display:block}}
+body.docs-app .docs-form-page{width:calc(100% - 32px)}

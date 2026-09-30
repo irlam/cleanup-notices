@@ -37,6 +37,16 @@
   ],
   "shortcuts": [
     {
+      "name": "Offline Workspace",
+      "url": "/field.html",
+      "icons": [
+        {
+          "src": "/assets/icons/icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
       "name": "New Clean-Up Notice",
       "url": "/forms/clean-up/form.php",
       "icons": [

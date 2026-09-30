@@ -3,7 +3,7 @@
 $siteBrandName = 'Site Documents';
 $currentPath = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/';
 $loggedInUser = session_status() === PHP_SESSION_ACTIVE ? ($_SESSION['user'] ?? null) : null;
-$links = [['Dashboard', '/dashboard.php'], ['New Notice', '/forms/clean-up/form.php'], ['View Notices', '/forms/clean-up/list.php']];
+$links = [['Dashboard', '/dashboard.php'], ['New Notice', '/forms/clean-up/form.php'], ['View Notices', '/forms/clean-up/list.php'], ['Offline', '/field.html']];
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -20,9 +20,13 @@ $links = [['Dashboard', '/dashboard.php'], ['New Notice', '/forms/clean-up/form.
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Site Docs">
-  <script defer src="/assets/js/pwa.js?v=20261001"></script>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="stylesheet" href="/assets/css/admin.css?v=20261001">
+  <script>window.DOCS_OFFLINE_USER = <?= json_encode($loggedInUser ? (string)$loggedInUser : null, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>;</script>
+  <script defer src="/assets/js/offline-store.js?v=2"></script>
+  <script defer src="/assets/vendor/jspdf.umd.min.js"></script>
+  <script defer src="/assets/js/offline-app.js?v=2"></script>
+  <script defer src="/assets/js/pwa.js?v=2"></script>
+  <link rel="stylesheet" href="/assets/css/utilities.css?v=offline2">
+  <link rel="stylesheet" href="/assets/css/admin.css?v=offline2">
 </head>
 <body class="docs-app<?= $loggedInUser ? '' : ' docs-public' ?>">
 <header class="docs-nav">
