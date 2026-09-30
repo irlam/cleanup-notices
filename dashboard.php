@@ -100,9 +100,9 @@ function sparkline_svg(array $series, int $w=260, int $h=60, int $pad=6): string
   <div class="max-w-6xl mx-auto px-4 py-8 md:py-12">
     <div class="flex items-start md:items-center justify-between gap-4">
       <div>
-        <h1 class="text-2xl md:text-3xl font-bold text-white-900">Dashboard</h1>
-        <p class="text-white-600 mt-1">Quick actions and a snapshot of activity across site.</p>
-        <div class="mt-3 flex flex-wrap gap-2 text-black">
+        <h1 class="text-2xl md:text-3xl font-bold text-white">Dashboard</h1>
+        <p class="text-slate-200 mt-1">Quick actions and a snapshot of activity across site.</p>
+        <div class="mt-3 flex flex-wrap gap-2 text-slate-200">
           <span class="chip">User: <strong class="font-medium"><?php echo esc($_SESSION['user']); ?></strong></span>
           <span class="chip">Today: <strong class="font-medium"><?php echo date('d-m-Y'); ?></strong></span>
         </div>
@@ -168,8 +168,8 @@ function sparkline_svg(array $series, int $w=260, int $h=60, int $pad=6): string
   <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
     <!-- Recent Notices -->
     <div class="card rounded-xl overflow-hidden">
-      <div class="px-4 py-3 border-b bg-white/60">
-        <h2 class="text-lg font-semibold text-slate-900">Recent Notices</h2>
+      <div class="px-4 py-3 border-b docs-panel-header">
+        <h2 class="text-lg font-semibold text-slate-100">Recent Notices</h2>
       </div>
       <div class="p-4 overflow-x-auto">
         <?php if(empty($recent)): ?>
@@ -187,7 +187,7 @@ function sparkline_svg(array $series, int $w=260, int $h=60, int $pad=6): string
             </thead>
             <tbody>
               <?php foreach($recent as $r): ?>
-                <tr class="hover:bg-slate-50">
+                <tr class="docs-table-row">
                   <td class="p-2"><?php echo (int)$r['id']; ?></td>
                   <td class="p-2"><?php echo esc($r['site_name']); ?></td>
                   <td class="p-2"><?php echo esc($r['location']); ?></td>
@@ -203,8 +203,8 @@ function sparkline_svg(array $series, int $w=260, int $h=60, int $pad=6): string
 
     <!-- Top Sites -->
     <div class="card rounded-xl overflow-hidden">
-      <div class="px-4 py-3 border-b bg-white/60">
-        <h2 class="text-lg font-semibold text-slate-900">Top Sites (Last 30 Days)</h2>
+      <div class="px-4 py-3 border-b docs-panel-header">
+        <h2 class="text-lg font-semibold text-slate-100">Top Sites (Last 30 Days)</h2>
       </div>
       <div class="p-4">
         <?php if(empty($topSites)): ?>
@@ -219,7 +219,7 @@ function sparkline_svg(array $series, int $w=260, int $h=60, int $pad=6): string
             </thead>
             <tbody>
               <?php foreach($topSites as $row): ?>
-                <tr class="hover:bg-slate-50">
+                <tr class="docs-table-row">
                   <td class="p-2"><?php echo esc($row['site_name']); ?></td>
                   <td class="p-2"><?php echo (int)$row['cnt']; ?></td>
                 </tr>
@@ -233,3 +233,4 @@ function sparkline_svg(array $series, int $w=260, int $h=60, int $pad=6): string
 </div>
 
 <?php require_once __DIR__ . '/includes/footer.php'; ?>
+

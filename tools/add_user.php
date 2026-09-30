@@ -48,63 +48,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 ?>
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>Add User</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <style>
-    body {
-      background: #f9f9f9;
-      font-family: 'Segoe UI', sans-serif;
-      padding: 20px;
-      margin: 0;
-    }
-    .container {
-      max-width: 400px;
-      margin: 0 auto;
-      background: #fff;
-      padding: 24px;
-      border-radius: 8px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-    }
-    h2 {
-      text-align: center;
-      margin-bottom: 1rem;
-    }
-    input, select {
-      width: 100%;
-      padding: 12px;
-      margin-bottom: 1rem;
-      border: 1px solid #ccc;
-      border-radius: 6px;
-      font-size: 16px;
-    }
-    button {
-      width: 100%;
-      background: #007bff;
-      color: white;
-      padding: 12px;
-      border: none;
-      border-radius: 6px;
-      font-size: 16px;
-      cursor: pointer;
-    }
-    button:hover {
-      background: #0056b3;
-    }
-    .msg {
-      padding: 12px;
-      margin-bottom: 1rem;
-      border-radius: 6px;
-    }
-    .success { background: #d4edda; color: #155724; }
-    .error   { background: #f8d7da; color: #721c24; }
-  </style>
-</head>
-<body>
-  <div class="container">
+<?php require_once __DIR__ . '/../includes/header.php'; ?>
+<main class="docs-account-page">
+<div class="container">
     <h2>Create New User</h2>
 
     <?php if ($success): ?>
@@ -114,15 +60,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <?php endif; ?>
 
     <form method="post">
-      <input type="text" name="username" placeholder="Username" required>
-      <input type="email" name="email" placeholder="Email" required>
-      <input type="password" name="password" placeholder="Password" required>
-      <select name="role">
+      <label for="username">Username</label><input id="username" type="text" name="username" placeholder="Username" required>
+      <label for="email">Email address</label><input id="email" type="email" name="email" placeholder="Email" required>
+      <label for="password">Password</label><input id="password" type="password" name="password" placeholder="Password" required>
+      <label for="role">Role</label><select id="role" name="role">
         <option value="user">User</option>
         <option value="admin">Admin</option>
       </select>
-      <button type="submit">Add User</button>
+      <button class="btn-primary" type="submit">Add User</button>
     </form>
   </div>
-</body>
-</html>
+</main>
+<?php require_once __DIR__ . '/../includes/footer.php'; ?>
+

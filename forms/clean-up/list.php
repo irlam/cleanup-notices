@@ -63,11 +63,11 @@ $closedCnt = count($rows) - $openCnt;
       <div>
         <h1 class="text-2xl md:text-3xl font-bold text-white">Clean-Up Notices</h1>
         <p class="text-slate-200 mt-1">Browse, filter, close, and open Clean-Up Notices.</p>
-        <div class="mt-3 flex flex-wrap gap-2 text-black">
+        <div class="mt-3 flex flex-wrap gap-2 text-slate-200">
           <span class="chip">User: <strong><?php echo esc($_SESSION['user']); ?></strong></span>
           <span class="chip">Results: <strong><?php echo (int)$total; ?></strong></span>
           <?php if (isset($_GET['closed'])): ?>
-            <span class="chip" style="background:#d1fae5;color:#065f46;">Marked as closed.</span>
+            <span class="chip docs-status-success">Marked as closed.</span>
           <?php endif; ?>
         </div>
       </div>
@@ -157,7 +157,7 @@ $closedCnt = count($rows) - $openCnt;
       </thead>
       <tbody>
         <?php foreach ($rows as $r): ?>
-          <tr class="hover:bg-slate-50">
+          <tr class="docs-table-row">
             <td><?php echo (int)$r['id']; ?></td>
             <td><?php echo esc($r['site_name']); ?></td>
             <td><?php echo esc($r['location']); ?></td>
@@ -165,9 +165,9 @@ $closedCnt = count($rows) - $openCnt;
             <td><?php echo esc(date('d/m/Y H:i', strtotime($r['issued_at']))); ?></td>
             <td>
               <?php if (($r['status'] ?? 'open') === 'closed'): ?>
-                <span class="chip" style="background:#e2e8f0;color:#111827;">Closed</span>
+                <span class="chip docs-status-closed">Closed</span>
               <?php else: ?>
-                <span class="chip" style="background:#dbeafe;color:#1e3a8a;">Open</span>
+                <span class="chip docs-status-open">Open</span>
               <?php endif; ?>
             </td>
             <td><a href="/forms/clean-up/pdf.php?id=<?php echo (int)$r['id']; ?>" class="text-blue-600 hover:underline" target="_blank">PDF</a></td>
@@ -188,3 +188,4 @@ $closedCnt = count($rows) - $openCnt;
 </div>
 
 <?php require_once __DIR__ . '/../../includes/footer.php'; ?>
+

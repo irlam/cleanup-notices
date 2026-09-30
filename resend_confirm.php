@@ -45,68 +45,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 ?>
 
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="UTF-8">
-    <title>Resend Confirmation Email</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <style>
-        body {
-            background: #f0f4f8;
-            font-family: Arial, sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-        }
-        .container {
-            background: #fff;
-            padding: 2em;
-            border-radius: 10px;
-            max-width: 400px;
-            width: 100%;
-            box-shadow: 0 0 20px rgba(0,0,0,0.05);
-        }
-        h1 {
-            font-size: 1.5rem;
-            margin-bottom: 1em;
-            text-align: center;
-        }
-        input[type="email"] {
-            width: 100%;
-            padding: 0.75em;
-            margin-bottom: 1em;
-            border: 1px solid #ccc;
-            border-radius: 6px;
-        }
-        button {
-            width: 100%;
-            background: #007bff;
-            color: #fff;
-            padding: 0.75em;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            font-weight: bold;
-        }
-        .msg {
-            text-align: center;
-            margin-top: 1em;
-            color: #333;
-        }
-    </style>
-</head>
-<body>
+<?php require_once __DIR__ . '/includes/header.php'; ?>
+<main class="docs-account-page">
 <div class="container">
     <h1>Resend Confirmation</h1>
     <form method="POST">
-        <input type="email" name="email" placeholder="Enter your email..." required>
-        <button type="submit">Resend Email</button>
+        <label for="email">Email address</label><input id="email" type="email" name="email" placeholder="Enter your email..." required>
+        <button class="btn-primary" type="submit">Resend Email</button>
     </form>
     <?php if ($message): ?>
         <div class="msg"><?= $message ?></div>
     <?php endif; ?>
 </div>
-</body>
-</html>
+</main>
+<?php require_once __DIR__ . '/includes/footer.php'; ?>
+

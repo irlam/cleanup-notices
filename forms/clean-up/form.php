@@ -9,13 +9,7 @@ require_once __DIR__ . '/../../includes/functions.php';
 
 date_default_timezone_set('Europe/London');
 ?>
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <title>New Clean-Up Notice</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="icon" href="/assets/img/favicon.png" type="image/png">
+<?php require_once __DIR__ . '/../../includes/header.php'; ?>
   <style>
     body {
       background-color: #111827;
@@ -86,9 +80,7 @@ date_default_timezone_set('Europe/London');
       color: #fff;
     }
   </style>
-</head>
-<body>
-<div class="container">
+<main class="container docs-form-page">
   <h1>New Clean-Up Notice</h1>
   <form method="post" action="submit.php" enctype="multipart/form-data" onsubmit="return beforeSubmit();">
     <div class="form-row"><label for="site_name">Site Name *</label><input type="text" id="site_name" name="site_name" required></div>
@@ -162,7 +154,7 @@ date_default_timezone_set('Europe/London');
 
     <div class="form-row"><button type="submit" class="btn">Submit Notice</button></div>
   </form>
-</div>
+</main>
 
 <script>
 document.addEventListener('DOMContentLoaded', function () {
@@ -338,5 +330,5 @@ document.addEventListener('DOMContentLoaded', function () {
   };
 });
 </script>
-</body>
-</html>
+<?php require_once __DIR__ . '/../../includes/footer.php'; ?>
+

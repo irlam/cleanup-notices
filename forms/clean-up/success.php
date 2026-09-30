@@ -28,14 +28,6 @@ function ukdt(?string $s): string {
   return $ts ? date('d/m/Y H:i', $ts) : $s;
 }
 ?>
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="utf-8">
-  <title>Notice Submitted</title>
-  <link rel="stylesheet" href="/assets/css/admin.css?v=20250801-uk">
-</head>
-<body class="bg-gray-50">
 <?php require_once __DIR__ . '/../../includes/header.php'; ?>
 
 <div class="max-w-6xl mx-auto px-4 py-6 space-y-6">
@@ -81,5 +73,5 @@ function ukdt(?string $s): string {
 </div>
 
 <?php require_once __DIR__ . '/../../includes/footer.php'; ?>
-</body>
-</html>
+
+
