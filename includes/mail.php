@@ -14,7 +14,7 @@ define('SMTP_PASS', 'Subaru5554346');
 define('SMTP_SECURE', 'ssl'); // SSL for port 465
 
 define('MAIL_FROM', 'clean-up.notice@defecttracker.uk');
-define('MAIL_FROM_NAME', 'McGoff - Clean-up Notice Notification');
+define('MAIL_FROM_NAME', 'Site Documents - Clean-up Notice Notification');
 
 function send_mail($toEmails, string $subject, string $htmlBody, array $attachments = []): array {
     $mail = new PHPMailer(true);
@@ -60,3 +60,4 @@ function send_mail($toEmails, string $subject, string $htmlBody, array $attachme
         return ['ok' => false, 'error' => $mail->ErrorInfo ?: $e->getMessage()];
     }
 }
+

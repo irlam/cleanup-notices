@@ -293,7 +293,6 @@ input[type="checkbox"], input[type="radio"] { width: auto; }
 .docs-login-card { display: grid; grid-template-columns: 1fr 1fr; width: min(960px,100%); border: 1px solid var(--border-color); border-radius: 18px; background: var(--surface-color); padding: 40px; gap: 40px; box-shadow: 0 25px 60px rgba(0,0,0,.25); }
 .docs-login-hero { display: flex; flex-direction: column; align-items: flex-start; gap: 18px; }
 .docs-eyebrow { color: #67e8f9; background: rgba(34,211,238,.1); border: 1px solid rgba(34,211,238,.2); border-radius: 999px; padding: 5px 10px; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .12em; }
-.docs-company-logo { width: 130px; max-height: 85px; object-fit: contain; background: white; padding: 12px; border-radius: 8px; }
 .docs-login h1 { font-size: clamp(28px,3vw,38px); line-height: 1.15; font-weight: 700; color: #f8fafc; }
 .docs-login h2 { font-size: 25px; color: #f8fafc; font-weight: 600; margin: 0 0 6px; }
 .docs-login-hero p { color: #cbd5e1; max-width: 330px; }
@@ -351,3 +350,13 @@ body.docs-app .docs-form-page { margin: 28px auto; max-width: 860px; background:
 .docs-form-page .toolbar button { min-height: 42px; padding: 8px 12px; border: 1px solid var(--border-color); border-radius: 8px; background: var(--surface-hover); color: var(--text-color); cursor: pointer; }
 .docs-account-page .success { padding: 12px; border-radius: 8px; background: rgba(34,197,94,.12); color: #86efac; }
 .docs-account-page .error { padding: 12px; border-radius: 8px; background: rgba(248,113,113,.12); color: #fca5a5; }
+/* Site Documents identity */
+.docs-login-brand { display:flex; align-items:center; gap:16px; color:#f8fafc; font-size:24px; font-weight:700; line-height:1.2; }
+.docs-login-brand img { width:88px; height:88px; border-radius:18px; }
+.docs-login-brand small { display:block; margin-top:7px; font-size:11px; font-weight:400; color:var(--text-muted-color); }
+.docs-brand-icon { object-fit:cover; background:none; }
+.docs-install { padding:12px 20px 0; max-width:560px; margin:auto; text-align:center; color:var(--text-muted-color); font-size:12px; }
+.docs-install details { margin-top:12px; }
+.docs-install summary { cursor:pointer; color:var(--secondary-color); }
+.docs-install p { margin:10px 0; }
+@media(max-width:400px){ .docs-login-brand{font-size:20px;gap:12px}.docs-login-brand img{width:64px;height:64px} }

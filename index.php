@@ -7,7 +7,7 @@ require_once __DIR__ . '/includes/header.php';
   <div class="docs-login-card">
     <section class="docs-login-hero">
       <span class="docs-eyebrow">Site document control</span>
-      <img src="/assets/img/mcgoff.png" alt="McGoff" class="docs-company-logo">
+      <div class="docs-login-brand"><img src="/assets/brand/site-documents-logo.png" alt="" width="88" height="88"><span>Site Documents<small>Clean-up notice management</small></span></div>
       <h1>Cleaner sites.<br>Clearer records.</h1>
       <p>Create, issue and track clean-up notices from wherever you are on site.</p>
       <div class="docs-login-features"><span>Photos &amp; signatures</span><span>PDF notices</span><span>Track &amp; close out</span></div>

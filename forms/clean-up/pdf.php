@@ -149,10 +149,10 @@ try {
 
     function Header() {
       if ($this->logoPath && is_readable($this->logoPath)) {
-        $this->Image($this->logoPath, 10, 10, 28, 0, '', '');
+        $this->Image($this->logoPath, 10, 8, 12, 12, '', '');
       }
       $this->SetFont('helvetica', 'B', 16);
-      $this->SetXY(42, 12);
+      $this->SetXY(26, 12);
       $this->Cell(0, 8, 'Clean-Up Notice', 0, 1, 'L');
 
       $this->SetDrawColor(200,200,200);
@@ -200,7 +200,7 @@ try {
   $pdf->SetSubject('Clean-Up Notice', true);
 
   // Optional logo
-  $maybeLogo = realpath(__DIR__ . '/../../assets/img/mcgoff.png');
+  $maybeLogo = realpath(__DIR__ . '/../../assets/brand/site-documents-logo.png');
   if ($maybeLogo && is_file($maybeLogo)) $pdf->logoPath = $maybeLogo;
 
   $pdf->AddPage();
@@ -337,3 +337,4 @@ if (!empty($notice['closed_at'])) {
   echo 'Unable to render PDF.';
   exit;
 }
+
