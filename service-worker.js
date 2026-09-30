@@ -1,6 +1,6 @@
 'use strict';
 importScripts('/assets/js/offline-store.js');
-const CACHE='site-documents-offline-shell-v2';
+const CACHE='site-documents-offline-shell-v3';
 const SHELL=[
  '/offline.html','/field.html','/assets/css/admin.css','/assets/css/utilities.css',
  '/assets/css/notice-form.css','/assets/js/offline-store.js','/assets/js/offline-app.js',

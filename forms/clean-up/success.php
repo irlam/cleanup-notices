@@ -59,7 +59,7 @@ function ukdt(?string $s): string {
       <div>
         <div><strong>Urgency:</strong> <?php echo esc($notice['urgency'] ?? ''); ?></div>
         <div><strong>Completed OK?</strong> <?php echo esc($notice['completed_ok'] ?? ''); ?></div>
-        <div><strong>McGoff to Clear?</strong> <?php echo esc($notice['mcgoff_clear'] ?? ''); ?></div>
+        <div><strong>Main contractor to arrange clearance?</strong> <?php echo esc($notice['mcgoff_clear'] ?? ''); ?></div>
       </div>
     </div>
 
@@ -73,5 +73,4 @@ function ukdt(?string $s): string {
 </div>
 
 <?php require_once __DIR__ . '/../../includes/footer.php'; ?>
-
 

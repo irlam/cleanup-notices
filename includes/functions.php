@@ -111,7 +111,7 @@ function make_pdf(array $data, string $outputPath){
     // Outcome
     $out = [];
     if(!empty($data['completed_ok'])) $out[] = 'Completed OK: '.$data['completed_ok'];
-    if(!empty($data['mcgoff_clear'])) $out[] = 'McGoff to clear: '.$data['mcgoff_clear'];
+    if(!empty($data['mcgoff_clear'])) $out[] = 'Main contractor to arrange clearance: '.$data['mcgoff_clear'];
     if($out){
         $pdf->SetFont('Arial','B',11); $pdf->Cell(30,6,'Outcome:',0,0);
         $pdf->SetFont('Arial','',11); $pdf->MultiCell(0,6, implode(' | ', $out)); $pdf->Ln(1);
@@ -153,3 +153,4 @@ function make_pdf(array $data, string $outputPath){
     if(!is_dir($dir)) mkdir($dir, 0775, true);
     return $pdf->Output('F', $outputPath) === '';
 }
+

@@ -19,7 +19,7 @@
     line('Site Documents - Clean-Up Notice',true);
     line(item.status==='synced'?'Local copy - server reference #'+item.receipt.id:'OFFLINE DRAFT - awaiting server synchronisation',true);
     line('Device reference: '+item.id);line('Saved by: '+item.owner);
-    const labels={site_name:'Site',location:'Location',issued_at:'Issued at',issued_to:'Issued to',issued_by:'Issued by',reason:'Reason',description:'Description',urgency:'Urgency',deadline_at:'Deadline',completed_ok:'Completed OK',mcgoff_clear:'McGoff to clear'};
+    const labels={site_name:'Site',location:'Location',issued_at:'Issued at',issued_to:'Issued to',issued_by:'Issued by',reason:'Reason',description:'Description',urgency:'Urgency',deadline_at:'Deadline',completed_ok:'Completed OK',mcgoff_clear:'Main contractor to arrange clearance'};
     for(const [name,label]of Object.entries(labels))line(label+': '+field(item,name));
     line('Recipients: '+item.entries.filter(e=>e.name==='recipients[]').map(e=>e.value).join(', '));
     async function image(data,label){

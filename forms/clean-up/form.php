@@ -43,7 +43,7 @@ date_default_timezone_set('Europe/London');
         <option value="no">No</option>
       </select>
     </div>
-    <div class="form-row"><label for="mcgoff_clear">McGoff to Clear? *</label>
+    <div class="form-row"><label for="mcgoff_clear">Main contractor to arrange clearance? *</label>
       <select id="mcgoff_clear" name="mcgoff_clear" required>
         <option value="">— Select —</option>
         <option value="yes">Yes</option>
@@ -92,4 +92,3 @@ date_default_timezone_set('Europe/London');
 
 <script defer src="/assets/js/notice-form.js?v=2"></script>
 <?php require_once __DIR__ . '/../../includes/footer.php'; ?>
-

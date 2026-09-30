@@ -260,7 +260,7 @@ if (!empty($notice['closed_at'])) {
   $pdf->SectionTitle('Action at End of Notification Period');
   $pdf->SetFont('helvetica', '', 11);
   $pdf->FieldRow('Completed Satisfactorily?', $f('completed_ok'), 95);
-  $pdf->FieldRow('McGoff to Undertake Clearance?', $f('mcgoff_clear'), 95);
+  $pdf->FieldRow('Main contractor to arrange clearance?', $f('mcgoff_clear'), 95);
 
   // Photos grid (3 per row)
   if (!$SKIP_IMAGES && !empty($photos)) {
@@ -337,4 +337,3 @@ if (!empty($notice['closed_at'])) {
   echo 'Unable to render PDF.';
   exit;
 }
-
