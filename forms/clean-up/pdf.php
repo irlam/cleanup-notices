@@ -16,11 +16,12 @@ if ($DEBUG) {
 }
 
 require_once __DIR__ . '/../../includes/config.php';
-require_once __DIR__ . '/../../includes/db.php';
+// submit.php and the renderer test can supply an existing PDO connection.
+if (!isset($pdo)) require_once __DIR__ . '/../../includes/db.php';
 require_once __DIR__ . '/../../includes/functions.php';
 
-// Use the path you confirmed:
-require_once __DIR__ . '/../../lib/fpdf/fpdf.php';
+require_once __DIR__ . '/../../lib/tfpdf/tfpdf.php';
+require_once __DIR__ . '/../../lib/tfpdf/font/unifont/ttfonts.php';
 
 // Accept from submit.php capture mode or GET ?id=
 $noticeId = isset($NOTICE_ID) ? (int)$NOTICE_ID : (int)($_GET['id'] ?? 0);
@@ -49,10 +50,10 @@ try {
     $photos = array_map(fn($r) => (string)$r['path'], $pstmt->fetchAll(PDO::FETCH_ASSOC));
   }
 
-  // ---------- Helpers (avoid non-ASCII glyphs that core FPDF can't render) ----------
+  // ---------- Notice values remain UTF-8 for the embedded Unicode font ----------
   $f = function(string $key, string $default = 'N/A') use ($notice) {
     $v = trim((string)($notice[$key] ?? ''));
-    return $v !== '' ? $v : $default; // ASCII fallback
+    return $v !== '' ? $v : $default;
   };
   $dt = function(string $key) use ($notice) {
     $v = trim((string)($notice[$key] ?? ''));
@@ -144,14 +145,14 @@ try {
   }
 
   // --------- FPDF subclass with layout helpers ----------
-  class CUNoticePDF extends FPDF {
+  class CUNoticePDF extends tFPDF {
     public $logoPath = null;
 
     function Header() {
       if ($this->logoPath && is_readable($this->logoPath)) {
         $this->Image($this->logoPath, 10, 8, 12, 12, '', '');
       }
-      $this->SetFont('helvetica', 'B', 16);
+      $this->SetFont('DejaVu', 'B', 16);
       $this->SetXY(26, 12);
       $this->Cell(0, 8, 'Clean-Up Notice', 0, 1, 'L');
 
@@ -167,21 +168,21 @@ try {
       $this->Line(10, 287, 200, 287);
 
       $this->SetY(-15);
-      $this->SetFont('helvetica', '', 8);
+      $this->SetFont('DejaVu', '', 8);
       $this->Cell(0, 10, 'Page '.$this->PageNo().'/{nb}', 0, 0, 'C');
     }
 
     // Key/value row with adjustable label width (prevents overlap on long labels)
     function FieldRow($label, $value, $labelW=60) {
-      $this->SetFont('helvetica', 'B', 11);
+      $this->SetFont('DejaVu', 'B', 11);
       $this->Cell($labelW, 7, $label, 0, 0, 'L');
-      $this->SetFont('helvetica', '', 11);
+      $this->SetFont('DejaVu', '', 11);
       $this->Cell(0, 7, $value, 0, 1, 'L');
     }
 
     function SectionTitle($text) {
       $this->Ln(2);
-      $this->SetFont('helvetica', 'B', 16);
+      $this->SetFont('DejaVu', 'B', 16);
       $this->Cell(0, 9, $text, 0, 1, 'L');
       $this->SetDrawColor(210,210,210);
       $this->SetLineWidth(0.6);
@@ -192,6 +193,8 @@ try {
   }
 
   $pdf = new CUNoticePDF('P', 'mm', 'A4');
+  $pdf->AddFont('DejaVu', '', 'DejaVuSans.ttf', true);
+  $pdf->AddFont('DejaVu', 'B', 'DejaVuSans-Bold.ttf', true);
   $pdf->AliasNbPages();
 
   $pdf->SetTitle('Clean-Up Notice #'.$noticeId, true);
@@ -206,7 +209,7 @@ try {
   $pdf->AddPage();
 
   // Top meta
-  $pdf->SetFont('helvetica', '', 11);
+  $pdf->SetFont('DejaVu', '', 11);
   $pdf->FieldRow('Notice ID', '#'.$noticeId, 40);
   $pdf->FieldRow('Issued At', $dt('issued_at'), 40);
   $pdf->FieldRow('Issued By', $f('issued_by'), 40);
@@ -230,7 +233,7 @@ if (!empty($notice['closed_at'])) {
   // Reason
   $pdf->Ln(1);
   $pdf->SectionTitle('Reason for Notification');
-  $pdf->SetFont('helvetica', '', 11);
+  $pdf->SetFont('DejaVu', '', 11);
   $reason = $f('reason', '');
   if ($reason === '') {
     $reason = 'Having undertaken a survey of the site, it has become apparent that off-cuts, waste/surplus materials and/or rubbish have been left on site and are becoming a hazard. This is a Health & Safety issue and must be addressed.';
@@ -240,13 +243,13 @@ if (!empty($notice['closed_at'])) {
   // Description
   $pdf->Ln(1);
   $pdf->SectionTitle('Description of Items under Notification');
-  $pdf->SetFont('helvetica', '', 11);
+  $pdf->SetFont('DejaVu', '', 11);
   $pdf->MultiCell(0, 6, $f('description'));
 
   // Timing / Urgency (two-column)
   $pdf->Ln(1);
   $pdf->SectionTitle('Timing / Urgency');
-  $pdf->SetFont('helvetica', '', 11);
+  $pdf->SetFont('DejaVu', '', 11);
   $y0 = $pdf->GetY();
   $pdf->SetXY(10, $y0);
   $pdf->FieldRow('Urgency',  $f('urgency'), 40);
@@ -258,7 +261,7 @@ if (!empty($notice['closed_at'])) {
   // Completion / Next action (wider labels so the '?' doesn't collide)
   $pdf->Ln(1);
   $pdf->SectionTitle('Action at End of Notification Period');
-  $pdf->SetFont('helvetica', '', 11);
+  $pdf->SetFont('DejaVu', '', 11);
   $pdf->FieldRow('Completed Satisfactorily?', $f('completed_ok'), 95);
   $pdf->FieldRow('Main contractor to arrange clearance?', $f('mcgoff_clear'), 95);
 
@@ -274,7 +277,7 @@ if (!empty($notice['closed_at'])) {
     $usable = $WALL - $x0;            // 190mm
     $w      = floor(($usable - ($gap * ($cols - 1))) / $cols);
     if ($w < 40) { $w = 40; }
-    $rowH   = 45;     // approx row height
+    $rowH   = 48;     // 45 mm image height plus 3 mm breathing room
     $y      = $pdf->GetY() + 2;
 
     foreach ($photos as $i => $abs) {
@@ -283,13 +286,22 @@ if (!empty($notice['closed_at'])) {
 
       $col = $i % $cols;
       if ($col === 0 && $i > 0) { $y += $rowH; }
+      if ($col === 0 && $y + $rowH > $pdf->GetPageHeight() - 15) {
+        $pdf->AddPage();
+        $pdf->SectionTitle('Photographs (continued)');
+        $y = $pdf->GetY() + 2;
+      }
       $x = $x0 + ($col * ($w + $gap));
       try {
-        $pdf->Image($embed, $x, $y, $w, 0);
+        $size = @getimagesize($embed);
+        if (!$size || !$size[0] || !$size[1]) continue;
+        $imageW = min($w, 45 * $size[0] / $size[1]);
+        $imageH = $imageW * $size[1] / $size[0];
+        $pdf->Image($embed, $x, $y, $imageW, $imageH);
       } catch (\Throwable $e) {
         if ($DEBUG) {
           $pdf->SetXY($x, $y);
-          $pdf->SetFont('helvetica', '', 8);
+          $pdf->SetFont('DejaVu', '', 8);
           $pdf->SetDrawColor(200,0,0);
           $pdf->SetTextColor(180,0,0);
           $pdf->Rect($x, $y, $w, 18);
@@ -303,15 +315,22 @@ if (!empty($notice['closed_at'])) {
   // Signature (absolute path in DB)
   $sigAbs = trim((string)($notice['signature_path'] ?? ''));
   if ($sigAbs !== '' && is_readable($sigAbs)) {
+    // Keep the heading and image together when preceding photos fill the page.
+    if ($pdf->GetY() + 60 > $pdf->GetPageHeight() - 15) $pdf->AddPage();
     $pdf->Ln(2);
     $pdf->SectionTitle('Signature');
-    $pdf->SetFont('helvetica', '', 11);
+    $pdf->SetFont('DejaVu', '', 11);
     $pdf->Cell(0, 7, 'Signed:', 0, 1, 'L');
     $xSig = 10;
     $ySig = $pdf->GetY() + 1;
     $embedSig = downscale_for_pdf($sigAbs, 1000, 1000, 82);
-    $pdf->Image($embedSig, $xSig, $ySig, 40, 0);
-    $pdf->SetY($ySig + 45);
+    $sigSize = @getimagesize($embedSig);
+    if ($sigSize && $sigSize[0] && $sigSize[1]) {
+      $sigW = min(40, 45 * $sigSize[0] / $sigSize[1]);
+      $sigH = $sigW * $sigSize[1] / $sigSize[0];
+      $pdf->Image($embedSig, $xSig, $ySig, $sigW, $sigH);
+      $pdf->SetY($ySig + $sigH + 5);
+    }
   }
 
   // Output

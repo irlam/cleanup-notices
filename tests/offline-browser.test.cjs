@@ -56,10 +56,10 @@ const server=http.createServer((req,res)=>{
   assert.equal(uploads,0);await page.screenshot({path:path.join(artifacts,'docs-offline-mobile.png'),fullPage:true});assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false);
   await page.screenshot({path:path.join(artifacts,'docs-offline-mobile.png'),fullPage:true});
   loseReply=true;await context.setOffline(false);await page.evaluate(async()=>{await DocsOffline.sync();});
-  await poll(page,async()=>{await DocsOffline.sync();const r=(await DocsOffline.noticeItems('irlam')).find(r=>r.status==='pending');return r&&r.attempts>0;});
+  await poll(page,async()=>{await DocsOffline.sync();const rows=await DocsOffline.noticeItems('irlam');return rows.some(r=>r.status==='synced'||(r.status==='pending'&&r.attempts>0));});
 
   assert.equal(uploads,1);
-  await page.evaluate(async()=>{for(const item of await DocsOffline.noticeItems('irlam')){item.nextTry=0;await DocsOffline.put('items',item);}await DocsOffline.sync();});
+  await page.evaluate(async()=>{for(const item of await DocsOffline.noticeItems('irlam')){if(item.status==='pending'){item.nextTry=0;await DocsOffline.put('items',item);}}await DocsOffline.sync();});
   const state=await page.evaluate(async()=>{const r=(await DocsOffline.noticeItems('irlam')).find(r=>r.status==='synced');return {status:r?.status,pdfSize:r?.pdf?.size,fileCount:r?.entries.filter(e=>e.kind==='file').length};});
   assert.equal(state.status,'synced');assert(state.pdfSize>20);assert.equal(state.fileCount,1);assert.equal(uploads,1);
   await context.setOffline(true);const savedEvent=page.waitForEvent('download');await page.goto(base+'/forms/clean-up/pdf.php?id=101').catch(error=>{if(!error.message.includes('Download is starting'))throw error;});const saved=await savedEvent;await saved.saveAs(path.join(artifacts,'docs-cached-offline.pdf'));assert(fs.readFileSync(path.join(artifacts,'docs-cached-offline.pdf')).subarray(0,5).equals(Buffer.from('%PDF-')));

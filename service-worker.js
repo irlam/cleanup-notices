@@ -14,10 +14,11 @@ self.addEventListener('activate',event=>event.waitUntil(caches.keys().then(keys=
  (key.startsWith('site-documents-public-')||key.startsWith('site-documents-offline-shell-'))&&key!==CACHE).map(key=>caches.delete(key)))).then(()=>self.clients.claim())));
 async function savedPdf(url,owner){
  const id=Number(url.searchParams.get('id'));if(!owner||!id)return null;
+ const headers={'Content-Type':'application/pdf','Content-Disposition':'attachment; filename="clean-up-notice-'+id+'.pdf"'};
  const downloaded=await DocsOffline.get('library',owner+':'+id);
- if(downloaded?.pdf)return new Response(downloaded.pdf,{headers:{'Content-Type':'application/pdf'}});
+ if(downloaded?.pdf)return new Response(downloaded.pdf,{headers});
  const submitted=(await DocsOffline.noticeItems(owner)).find(item=>item.receipt?.id===id&&item.pdf);
- return submitted?new Response(submitted.pdf,{headers:{'Content-Type':'application/pdf'}}):null;
+ return submitted?new Response(submitted.pdf,{headers}):null;
 }
 async function offlineNavigation(url){
  const owner=await DocsOffline.meta('activeOwner');
