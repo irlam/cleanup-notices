@@ -26,7 +26,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             // Send confirmation email
             $subject = "Confirm Your Account";
-            $link = "https://docs.defecttracker.uk/confirm.php?token=" . urlencode($token);
+            $link = "https://sitenotices.site/confirm.php?token=" . urlencode($token);
             $body = "
                 <p>Hello <strong>" . htmlspecialchars($user['username']) . "</strong>,</p>
                 <p>Please confirm your account by clicking the link below:</p>
