@@ -8,3 +8,7 @@
 /includes/suite.local.php
 .env
 .env.*
+
+# User-generated notices, signatures, images and PDFs stay on Plesk/private backups.
+/uploads/**
+/pdfs/*.pdf
