@@ -14,6 +14,7 @@ require_once __DIR__ . '/../../includes/functions.php';
 require_once __DIR__ . '/../../includes/header.php';
 
 $site      = trim($_GET['site'] ?? '');
+$siteExact = trim((string) ($_GET['site_exact'] ?? ''));
 $issued_to = trim($_GET['issued_to'] ?? '');
 $status    = $_GET['status'] ?? 'all';   // all|open|closed
 $from      = trim($_GET['from'] ?? '');
@@ -22,7 +23,11 @@ $to        = trim($_GET['to'] ?? '');
 // WHERE
 $clauses = [];
 $params  = [];
-if ($site !== '') {
+if ($siteExact !== '') {
+  // Exact project map supplied by Construction Suite, not a wildcard search.
+  $clauses[] = 'site_name = :site_exact';
+  $params[':site_exact'] = $siteExact;
+} elseif ($site !== '') {
   $clauses[] = 'site_name LIKE :site';
   $params[':site'] = "%$site%";
 }
