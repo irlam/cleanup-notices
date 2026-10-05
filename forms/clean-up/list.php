@@ -89,6 +89,7 @@ $closedCnt = count($rows) - $openCnt;
 
   <!-- Filters -->
   <form class="card p-4 space-y-4" method="get">
+    <?php if ($siteExact !== ''): ?><input type="hidden" name="site_exact" value="<?= htmlspecialchars($siteExact, ENT_QUOTES, 'UTF-8') ?>"><?php endif; ?>
     <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-4">
       <div>
         <label class="block text-sm font-medium">Site</label>
