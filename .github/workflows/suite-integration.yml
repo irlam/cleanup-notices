@@ -1,0 +1,24 @@
+name: Site Notices Suite integration checks
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  php:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          extensions: pdo, pdo_mysql
+      - name: Check syntax
+        run: |
+          php -l includes/suite-integration.php
+          php -l api/suite-summary.php
+          php -l api/suite-references.php
+          php -l tests/suite-integration.php
+      - name: Test authentication fails closed
+        run: php tests/suite-integration.php
