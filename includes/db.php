@@ -14,11 +14,11 @@ if (!is_array($private)) {
     $private = [];
 }
 
-$host = trim((string) ($private['host'] ?? getenv('NOTICES_DB_HOST') ?: ''));
-$port = trim((string) ($private['port'] ?? getenv('NOTICES_DB_PORT') ?: '3306'));
-$db   = trim((string) ($private['name'] ?? getenv('NOTICES_DB_NAME') ?: ''));
-$user = trim((string) ($private['user'] ?? getenv('NOTICES_DB_USER') ?: ''));
-$pass = (string) ($private['pass'] ?? getenv('NOTICES_DB_PASS') ?: '');
+$host = trim((string) ($private['host'] ?? (getenv('NOTICES_DB_HOST') ?: '')));
+$port = trim((string) ($private['port'] ?? (getenv('NOTICES_DB_PORT') ?: '3306')));
+$db   = trim((string) ($private['name'] ?? (getenv('NOTICES_DB_NAME') ?: '')));
+$user = trim((string) ($private['user'] ?? (getenv('NOTICES_DB_USER') ?: '')));
+$pass = (string) ($private['pass'] ?? (getenv('NOTICES_DB_PASS') ?: ''));
 
 if ($host === '' || $db === '' || $user === '' || $pass === '') {
     error_log('Site Notices database configuration is missing.');
