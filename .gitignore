@@ -8,3 +8,4 @@
 /includes/suite.local.php
 .env
 .env.*
+/includes/db.local.php
