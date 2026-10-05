@@ -22,3 +22,16 @@ jobs:
           php -l tests/suite-integration.php
       - name: Test authentication fails closed
         run: php tests/suite-integration.php
+
+  offline:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - name: Install locked dependencies
+        run: npm ci
+      - name: Durable offline queue and replay tests
+        run: npm test
