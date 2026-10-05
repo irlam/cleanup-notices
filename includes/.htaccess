@@ -1,0 +1,4 @@
+# Keep private settings inaccessible even if PHP handling is misconfigured.
+<FilesMatch "^(db\.local\.php|suite\.local\.php|db\.php|config\.php)$">
+    Require all denied
+</FilesMatch>
