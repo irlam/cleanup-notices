@@ -3,7 +3,8 @@ declare(strict_types=1);
 
 // Test the actual authenticated read-only API against a disposable DB.
 // This script is for CI only; do not run against production.
-$key = (string) (getenv('CONSTRUCTION_SUITE_API_KEY') ?: '');
+$key = bin2hex(random_bytes(32));
+putenv('CONSTRUCTION_SUITE_API_KEY=' . $key);
 if (strlen($key) < 32 || !getenv('NOTICES_DB_NAME')) {
     fwrite(STDERR, "Disposable test database and key required.\n");
     exit(2);
