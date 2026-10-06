@@ -16,7 +16,9 @@ jobs:
           extensions: pdo, pdo_mysql
       - name: Check syntax
         run: |
+          php -l includes/db.php
           php -l includes/suite-integration.php
+          php -l bin/prepare-private-db.php
           php -l api/suite-summary.php
           php -l api/suite-references.php
           php -l tests/suite-integration.php
