@@ -1,0 +1,48 @@
+name: Public notices access-control smoke
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+  schedule:
+    - cron: '53 4 * * *'
+
+permissions:
+  contents: read
+
+jobs:
+  http:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Anonymous API must remain private
+        shell: bash
+        run: |
+          set -euo pipefail
+          for path in api/suite-summary.php api/suite-references.php; do
+            url="https://sitenotices.site/$path"
+            status="$(curl --silent --show-error --max-time 20 --output /dev/null --write-out '%{http_code}' "$url")"
+            echo "$path: HTTP $status"
+            test "$status" = '401'
+          done
+      - name: Anonymous users must not see notice lists
+        shell: bash
+        run: |
+          set -euo pipefail
+          for path in dashboard.php forms/clean-up/list.php forms/clean-up/form.php; do
+            url="https://sitenotices.site/$path"
+            code="$(curl --silent --show-error --max-time 20 --output /dev/null --write-out '%{http_code}' "$url")"
+            echo "$path: HTTP $code"
+            case "$code" in
+              301|302|303|401|403) ;;
+              *) echo "::error::Protected page did not reject anonymous visitor: $path"; exit 1;;
+            esac
+          done
+      - name: Static offline assets respond
+        shell: bash
+        run: |
+          set -euo pipefail
+          for path in offline.html manifest.webmanifest service-worker.js; do
+            code="$(curl --silent --show-error --max-time 20 --output /dev/null --write-out '%{http_code}' "https://sitenotices.site/$path")"
+            echo "$path: HTTP $code"
+            test "$code" = '200'
+          done
