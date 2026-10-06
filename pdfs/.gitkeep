@@ -1,0 +1,2 @@
+Production uploads and generated PDFs are stored on the server outside Git history.
+Do not delete real uploads when deploying.

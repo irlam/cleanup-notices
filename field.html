@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#0b1220"><title>Offline Workspace — Site Documents</title><link rel="manifest" href="/manifest.webmanifest"><link rel="icon" href="/assets/icons/icon-32.png"><link rel="apple-touch-icon" href="/assets/icons/icon-180.png"><link rel="stylesheet" href="/assets/css/utilities.css?v=2"><link rel="stylesheet" href="/assets/css/notice-form.css?v=2"><link rel="stylesheet" href="/assets/css/admin.css?v=offline2"><script defer src="/assets/js/offline-store.js?v=2"></script><script defer src="/assets/vendor/jspdf.umd.min.js"></script><script defer src="/assets/js/notice-form.js?v=2"></script><script defer src="/assets/js/offline-app.js?v=2"></script><script defer src="/assets/js/pwa.js?v=2"></script></head><body class="docs-app">
+<header class="docs-nav"><div class="docs-nav-inner"><a href="/field.html" class="docs-brand"><img src="/assets/icons/icon-96.png" class="docs-brand-icon" alt="" width="40" height="40"><span>Site Documents<small>Offline Workspace</small></span></a><a class="btn-secondary" href="/index.php">Sign in</a></div></header>
+<main class="max-w-6xl mx-auto px-4 py-6"><section class="card"><h1 class="text-2xl font-bold">Offline Workspace</h1><p id="offlineOwner" class="docs-muted"></p><p id="offlineStatus" role="status" aria-live="polite">Opening device storage…</p><p id="offlineFeedback" role="status" class="docs-muted"></p><div class="offline-actions"><button class="btn-primary" id="prepareOffline" type="button">Prepare for offline use</button><button class="btn-secondary" id="syncNow" type="button">Sync now</button><a class="btn-secondary" href="/dashboard.php">Dashboard</a></div><p class="docs-muted">Keep this app open when reconnecting. Background uploads are also attempted where the browser supports them.</p></section><section class="card mt-4"><h2 class="text-xl font-bold">On this device</h2><div id="offlineItems"></div></section><section class="card mt-4"><h2 class="text-xl font-bold">Saved site notices</h2><button class="btn-secondary" id="refreshNotices" type="button">Refresh recent notices</button><p class="docs-muted">Preparation downloads the latest 50 notices and their available PDFs and photos. Saved copies show their download dates; refresh before leaving signal.</p><div id="offlineLibrary"></div></section></main>
+<div id="offlineEditor"><main class="container docs-form-page">
+  <h1>New Clean-Up Notice</h1><p class="docs-muted">Your work is saved on this device. Submit to queue it for upload when signal returns.</p><p id="formSaveStatus" role="status" aria-live="polite"></p>
+  <form method="post" action="submit.php" enctype="multipart/form-data" id="noticeForm" onsubmit="return beforeSubmit();">
+    <div class="form-row"><label for="site_name">Site Name *</label><input type="text" id="site_name" name="site_name" required></div>
+    <div class="form-row"><label for="location">Location *</label><input type="text" id="location" name="location" required></div>
+    <div class="form-row"><label for="issued_at">Date / Time Issued *</label><input type="datetime-local" id="issued_at" name="issued_at" required></div>
+    <div class="form-row"><label for="issued_to">Issued To *</label><input type="text" id="issued_to" name="issued_to" required></div>
+    <div class="form-row"><label for="issued_by">Issued By *</label><input type="text" id="issued_by" name="issued_by" required></div>
+    <div class="form-row"><label for="reason">Reason</label><textarea id="reason" name="reason" rows="2"></textarea></div>
+    <div class="form-row"><label for="description">Description *</label><textarea id="description" name="description" rows="3" required></textarea></div>
+    <div class="form-row">
+      <label for="urgency">Urgency *</label>
+      <select id="urgency" name="urgency" required onchange="autoSetDeadline()">
+        <option value="">— Select —</option>
+        <option value="Immediate">Immediate</option>
+        <option value="Within 1 hour">Within 1 hour</option>
+        <option value="Same day">Same day</option>
+        <option value="Within 24 hours">Within 24 hours</option>
+        <option value="This week">This week</option>
+      </select>
+    </div>
+    <div class="form-row"><label for="deadline_at">Deadline</label><input type="datetime-local" id="deadline_at" name="deadline_at"></div>
+    <div class="form-row"><label for="completed_ok">Completed OK? *</label>
+      <select id="completed_ok" name="completed_ok" required>
+        <option value="">— Select —</option>
+        <option value="yes">Yes</option>
+        <option value="no">No</option>
+      </select>
+    </div>
+    <div class="form-row"><label for="mcgoff_clear">Main contractor to arrange clearance? *</label>
+      <select id="mcgoff_clear" name="mcgoff_clear" required>
+        <option value="">— Select —</option>
+        <option value="yes">Yes</option>
+        <option value="no">No</option>
+      </select>
+    </div>
+
+    <div class="form-row"><label for="photos">Upload Photos</label><input type="file" id="photos" name="photos[]" accept="image/*;capture=camera" multiple><div id="photoThumbs" class="thumbs"></div></div>
+
+    <div class="form-row">
+      <label for="annotate_file">Annotate (optional)</label>
+      <input type="file" id="annotate_file" accept="image/*">
+      <div class="toolbar">
+        <label>Pen: <input type="color" id="penColor" value="#e11d48"></label>
+        <label>Size: <input type="range" id="penSize" min="2" max="24" value="4"></label>
+        <button type="button" onclick="clearAnnotation()">Clear</button>
+        <button type="button" onclick="addAnnotation()">Add annotated image</button>
+      </div>
+      <canvas id="annCanvas" width="600" height="400"></canvas>
+      <div id="annThumbs" class="thumbs"></div>
+      <div id="annFields"></div>
+    </div>
+
+    <div class="form-row">
+      <label>Signature *</label>
+      <canvas id="sigCanvas" width="600" height="200"></canvas>
+      <div class="toolbar"><button type="button" onclick="clearSignature()">Clear Signature</button></div>
+      <input type="hidden" id="signature_data" name="signature_data">
+    </div>
+
+    <div class="form-row">
+      <label>Recipients *</label>
+      <select id="recipients" name="recipients[]" multiple required></select>
+      <input type="email" id="extra_email" placeholder="Add recipient email...">
+      <button type="button" class="btn" onclick="addRecipient()">+ Add Email</button>
+    </div>
+
+    <div class="form-row">
+      <label>Tap to add previous recipients:</label>
+      <div id="recipientChips"></div>
+    </div>
+
+    <div class="form-row offline-actions"><button type="submit" class="btn">Submit Notice</button><button type="button" id="saveDraftNow" class="btn-secondary">Save draft on device</button></div>
+  </form>
+</main></div>
+<footer class="docs-footer">Site Documents · Offline Workspace</footer></body></html>

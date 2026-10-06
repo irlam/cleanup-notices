@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>How It Works - Clean-Up Notice System</title>
+  <link rel="icon" href="/favicon.ico?v=20261001">
+  <link rel="icon" href="/assets/icons/icon-32.png" type="image/png" sizes="32x32">
+  <link rel="apple-touch-icon" href="/assets/icons/icon-180.png">
+  <link rel="manifest" href="/manifest.webmanifest">
+  <meta name="theme-color" content="#0b1220">
+  <script defer src="/assets/js/pwa.js?v=20261001"></script>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: #0f172a;
+      color: #f8fafc;
+      overflow-x: hidden;
+    }
+
+    header {
+      background: linear-gradient(135deg, #0ea5e9, #3b82f6);
+      text-align: center;
+      padding: 4rem 1rem;
+      animation: fadeIn 1.5s ease;
+    }
+
+    header h1 {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+      animation: slideUp 1s ease-out;
+    }
+
+    header p {
+      font-size: 1.25rem;
+      max-width: 800px;
+      margin: 0 auto;
+      animation: slideUp 1.2s ease-out;
+    }
+
+    section {
+      padding: 3rem 1rem;
+      max-width: 900px;
+      margin: auto;
+      opacity: 0;
+      transform: translateY(40px);
+      transition: all 0.6s ease;
+    }
+
+    section.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .feature {
+      margin-bottom: 2.5rem;
+      border-left: 4px solid #3b82f6;
+      padding-left: 1rem;
+    }
+
+    .feature h2 {
+      font-size: 1.5rem;
+      color: #38bdf8;
+    }
+
+    .feature p {
+      font-size: 1rem;
+      color: #cbd5e1;
+    }
+
+    footer {
+      text-align: center;
+      font-size: 0.9rem;
+      padding: 2rem 1rem;
+      color: #64748b;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0 }
+      to { opacity: 1 }
+    }
+
+    @keyframes slideUp {
+      from { transform: translateY(40px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+  </style>
+<link rel="stylesheet" href="/assets/css/admin.css?v=offline2">
+</head>
+<body class="docs-app docs-guide">
+<nav class="docs-guide-nav"><a href="/index.php" class="docs-brand"><img class="docs-brand-icon" src="/assets/icons/icon-96.png" alt="" width="40" height="40"><span>Site Documents<small>Back to sign in</small></span></a></nav>
+
+<header>
+  <h1>Clean-Up Notice System</h1>
+  <p>A fast, mobile-first tool for improving site cleanliness and safety — in just a few taps.</p>
+</header>
+
+<section class="visible">
+  <div class="feature">
+    <h2>📸 Snap It</h2>
+    <p>On-site staff can use their phone to photograph hazards, waste, or unclean areas directly in the form — no app install needed.</p>
+  </div>
+  <div class="feature">
+    <h2>✍️ Annotate & Sign</h2>
+    <p>Quickly highlight problem areas with the built-in drawing tool and sign the form for immediate accountability.</p>
+  </div>
+  <div class="feature">
+    <h2>📤 Submit & Notify</h2>
+    <p>Once submitted, a professional PDF is automatically generated and emailed to selected recipients like Site Managers or Safety Officers.</p>
+  </div>
+  <div class="feature">
+    <h2>📥 View & Track</h2>
+    <p>All submitted notices are logged and viewable in the secure dashboard — track resolutions, monitor deadlines, and close the loop.</p>
+  </div>
+</section>
+
+<section>
+  <div class="feature">
+    <h2>⚡ Why it works</h2>
+    <p>It reduces paperwork, speeds up resolution, and encourages cleaner sites by making reporting fast, visual, and accountable.</p>
+  </div>
+  <div class="feature">
+    <h2>🔒 Simple & Secure</h2>
+    <p>All data is securely stored. Users log in, submit forms, and only authorised personnel can view or manage notices.</p>
+  </div>
+  <div class="feature">
+    <h2>📱 Mobile-First Design</h2>
+    <p>Designed for real-world site use — you can prepare Offline Workspace, save notices with photos and signatures without signal, then synchronise when the connection returns. Download existing PDFs and photos before going offline.</p>
+  </div>
+</section>
+
+<footer>
+  Site Documents. Built for real sites, by real people.
+</footer>
+
+<script>
+  // Fade in sections as user scrolls
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) entry.target.classList.add('visible');
+    });
+  }, { threshold: 0.1 });
+
+  document.querySelectorAll('section').forEach(sec => observer.observe(sec));
+</script>
+
+</body>
+</html>
+

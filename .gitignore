@@ -1,0 +1,15 @@
+/node_modules/
+/test-results/
+/playwright-report/
+/tmp/
+/lib/tfpdf/font/unifont/*.cw.dat
+/lib/tfpdf/font/unifont/*.cw127.php
+/lib/tfpdf/font/unifont/*.mtx.php
+/includes/suite.local.php
+.env
+.env.*
+
+# User-generated notices, signatures, images and PDFs stay on Plesk/private backups.
+/uploads/**
+/pdfs/*.pdf
+/includes/db.local.php
