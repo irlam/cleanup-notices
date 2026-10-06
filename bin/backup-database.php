@@ -73,7 +73,6 @@ try {
         '--routines',
         '--triggers',
         '--hex-blob',
-        '--databases',
         $required['name'],
         '--result-file=' . $sql,
     ], [0 => ['pipe', 'r'], 1 => ['pipe', 'w'], 2 => ['pipe', 'w']], $pipes);
