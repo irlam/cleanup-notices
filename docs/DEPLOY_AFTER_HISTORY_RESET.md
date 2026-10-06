@@ -22,13 +22,15 @@ must be completed **before** deploying the cleaned repository.
 3. Confirm private `httpdocs/includes/db.local.php` and
    `httpdocs/includes/suite.local.php` remain intact. Never expose their
    contents or copy either file into Git.
-4. Try **Pull now**. Because main history was rewritten, Git may reject
-   the non-fast-forward update. If it does, Plesk's **Remove Repository**
-   command only removes the Git repository; Plesk documentation states the
-   already published target directory remains. Re-add the same remote
+4. Use Plesk's **Remove Repository** to remove the old Git clone
+   (which still holds prior credential-bearing Git objects locally).
+   Plesk documentation states the published target directory remains
+   in place. Re-add the same remote
    `https://github.com/irlam/cleanup-notices` with **main**, the
    original deployment path, and **Manual deployment**. Verify the
    path carefully; do not initialise a new empty document root.
+   Merely pulling a rewritten branch can leave old objects in the local
+   Git clone, even if it succeeds.
 5. **Deploy now** after steps 1–4. Confirm private config still exists.
    Then copy preserved generated `uploads/` and `pdfs/` content
    back into the original `httpdocs` locations if Git deployment
