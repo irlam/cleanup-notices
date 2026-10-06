@@ -47,11 +47,13 @@ jobs:
             id INT PRIMARY KEY,
             site_name VARCHAR(190) NOT NULL,
             status VARCHAR(20) NOT NULL,
+            completed_ok VARCHAR(12) NULL,
+            deadline_at DATETIME NULL,
             created_at DATETIME NOT NULL
           );
           INSERT INTO cleanup_notices VALUES
-            (101,'Test Site A','open','2026-01-01 10:00:00'),
-            (102,'Test Site B','closed','2026-01-01 11:00:00');
+            (101,'Test Site A','open','no','2026-01-02 10:00:00','2026-01-01 10:00:00'),
+            (102,'Test Site B','closed','yes',NULL,'2026-01-01 11:00:00');
           SQL
       - name: Run same CLI backup script as Plesk
         env:
@@ -65,6 +67,7 @@ jobs:
           php -l bin/verify-backup.php
           php bin/backup-database.php
           php bin/verify-backup.php
+          php tests/suite-api-fixture.php
           test "$(find ../.site-backups/notices -name 'notices-*.sql.gz' | wc -l)" -eq 1
       - name: Restore only into a NEW disposable database and compare records
         env:
