@@ -1,0 +1,83 @@
+name: Safe database backup and staging restore
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+  schedule:
+    - cron: '37 4 * * 1'
+
+permissions:
+  contents: read
+
+jobs:
+  recovery:
+    runs-on: ubuntu-latest
+    services:
+      mariadb:
+        image: mariadb:11
+        env:
+          MARIADB_ROOT_PASSWORD: ci-root-only
+          MARIADB_DATABASE: notices_source
+          MARIADB_USER: notices_test
+          MARIADB_PASSWORD: ci-notices-only
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd "healthcheck.sh --connect --innodb_initialized"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          extensions: pdo, pdo_mysql, zlib
+      - name: Install MariaDB CLI in disposable runner
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq mariadb-client
+      - name: Create isolated fixture database
+        env:
+          MYSQL_PWD: ci-notices-only
+        run: |
+          mariadb -h 127.0.0.1 -u notices_test notices_source <<'SQL'
+          CREATE TABLE cleanup_notices (
+            id INT PRIMARY KEY,
+            site_name VARCHAR(190) NOT NULL,
+            status VARCHAR(20) NOT NULL,
+            created_at DATETIME NOT NULL
+          );
+          INSERT INTO cleanup_notices VALUES
+            (101,'Test Site A','open','2026-01-01 10:00:00'),
+            (102,'Test Site B','closed','2026-01-01 11:00:00');
+          SQL
+      - name: Run same CLI backup script as Plesk
+        env:
+          NOTICES_DB_HOST: 127.0.0.1
+          NOTICES_DB_PORT: '3306'
+          NOTICES_DB_NAME: notices_source
+          NOTICES_DB_USER: notices_test
+          NOTICES_DB_PASS: ci-notices-only
+        run: |
+          php -l bin/backup-database.php
+          php -l bin/verify-backup.php
+          php bin/backup-database.php
+          php bin/verify-backup.php
+          test "$(find ../.site-backups/notices -name 'notices-*.sql.gz' | wc -l)" -eq 1
+      - name: Restore only into a NEW disposable database and compare records
+        env:
+          MYSQL_PWD: ci-root-only
+        run: |
+          mariadb -h 127.0.0.1 -u root -e "CREATE DATABASE notices_restore"
+          file="$(find ../.site-backups/notices -maxdepth 1 -name 'notices-*.sql.gz' | head -n 1)"
+          gzip -dc "$file" | mariadb -h 127.0.0.1 -u root notices_restore
+          actual="$(mariadb -h 127.0.0.1 -u root -Nse 'SELECT COUNT(*) FROM notices_restore.cleanup_notices')"
+          test "$actual" = '2'
+          actual="$(mariadb -h 127.0.0.1 -u root -Nse "SELECT status FROM notices_restore.cleanup_notices WHERE id=101")"
+          test "$actual" = 'open'
+          echo 'PASS: consistent dump, checksum, decompression, isolated restore and sample row verification'
+      - name: Remove runner-only backup
+        if: always()
+        run: rm -rf ../.site-backups
