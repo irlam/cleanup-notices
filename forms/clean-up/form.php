@@ -1,7 +1,7 @@
 <?php
 // /forms/clean-up/form.php
 declare(strict_types=1);
-session_start();
+if (session_status() !== PHP_SESSION_ACTIVE) { session_start(); }
 if (empty($_SESSION['offline_csrf'])) $_SESSION['offline_csrf'] = bin2hex(random_bytes(32));
 if (!isset($_SESSION['user'])) { header('Location: /index.php'); exit; }
 

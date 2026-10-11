@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 require_once __DIR__ . '/../includes/offline_sync.php';
-session_start();
+if (session_status() !== PHP_SESSION_ACTIVE) { session_start(); }
 if (empty($_SESSION['user'])) offline_reply(401, ['success'=>false, 'message'=>'Sign in to synchronise your saved notices.']);
 if (empty($_SESSION['offline_csrf'])) $_SESSION['offline_csrf'] = bin2hex(random_bytes(32));
 try {

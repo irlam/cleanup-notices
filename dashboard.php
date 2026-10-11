@@ -1,6 +1,6 @@
 <?php
 // dashboard.php (with sparkline + coloured KPIs, styled properly)
-session_start();
+if (session_status() !== PHP_SESSION_ACTIVE) { session_start(); }
 if (!isset($_SESSION['user'])) { header('Location: index.php'); exit; }
 ini_set('display_errors', 1); ini_set('display_startup_errors', 1); error_reporting(E_ALL);
 

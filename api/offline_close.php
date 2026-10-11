@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 require_once __DIR__ . '/../includes/offline_sync.php';
-session_start();
+if (session_status() !== PHP_SESSION_ACTIVE) { session_start(); }
 if (empty($_SESSION['user'])) offline_reply(401, ['success'=>false,'message'=>'Sign in to synchronise this close-out.']);
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') offline_reply(405, ['success'=>false,'message'=>'POST required.']);
 if ((string)($_POST['offline_owner'] ?? '') !== (string)$_SESSION['user'] || empty($_SESSION['offline_csrf']) ||

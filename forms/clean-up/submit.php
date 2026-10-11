@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 require_once __DIR__ . '/../../includes/offline_sync.php';
 $syncRequest = ($_SERVER['HTTP_X_OFFLINE_SUBMISSION'] ?? '') === '1';
-session_start();
+if (session_status() !== PHP_SESSION_ACTIVE) { session_start(); }
 if (!isset($_SESSION['user'])) {
   if ($syncRequest) offline_reply(401, ['success'=>false,'message'=>'Sign in as the notice author to synchronise.']);
   header('Location: /index.php'); exit;

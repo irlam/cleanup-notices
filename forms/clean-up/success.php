@@ -1,7 +1,7 @@
 <?php
 // /forms/clean-up/success.php
 declare(strict_types=1);
-session_start();
+if (session_status() !== PHP_SESSION_ACTIVE) { session_start(); }
 if (!isset($_SESSION['user'])) { header('Location: /index.php'); exit; }
 
 date_default_timezone_set('Europe/London');
