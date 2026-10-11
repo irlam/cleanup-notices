@@ -1,10 +1,10 @@
 'use strict';
 importScripts('/assets/js/offline-store.js');
-const CACHE='site-documents-offline-shell-v3';
+const CACHE='site-documents-offline-shell-v4';
 const SHELL=[
  '/offline.html','/field.html','/assets/css/admin.css','/assets/css/utilities.css',
  '/assets/css/notice-form.css','/assets/js/offline-store.js','/assets/js/offline-app.js',
- '/assets/js/notice-form.js','/assets/js/pwa.js','/assets/vendor/jspdf.umd.min.js',
+ '/assets/js/notice-form.js','/assets/js/pwa.js','/assets/js/suite-logout.js','/assets/vendor/jspdf.umd.min.js',
  '/assets/brand/site-documents-logo.png','/assets/icons/icon-32.png','/assets/icons/icon-96.png',
  '/assets/icons/icon-180.png','/assets/icons/icon-192.png','/assets/icons/icon-512.png',
  '/assets/icons/maskable-192.png','/assets/icons/maskable-512.png','/manifest.webmanifest'

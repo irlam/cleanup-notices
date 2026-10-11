@@ -3,6 +3,7 @@
   'use strict';
   const db=DocsOffline;
   let owner=null,editorId=null,restoredFiles=[],saveTimer,saveChain=Promise.resolve(),submitting=false,rendering=false;
+  window.DocsBeforeLogout=async()=>{clearTimeout(saveTimer);await saveChain;if($('noticeForm')&&!submitting&&(editorId||['site_name','location','description'].some(id=>$(id)?.value.trim())))await saveDraft();};
   const urls=[];
   const sessionChannel='BroadcastChannel'in window?new BroadcastChannel('site-documents-session'):null;
   if(sessionChannel)sessionChannel.onmessage=event=>{if(event.data?.owner!==owner){owner=null;submitting=true;if($('noticeForm'))$('noticeForm').closest('main').hidden=true;render().then(()=>message('The signed-in account changed. Reopen this workspace.'));}};
