@@ -13,3 +13,5 @@
 /uploads/**
 /pdfs/*.pdf
 /includes/db.local.php
+
+/includes/mail.local.php

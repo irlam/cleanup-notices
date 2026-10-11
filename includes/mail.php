@@ -6,17 +6,17 @@ require_once __DIR__ . '/../lib/PHPMailer/PHPMailer.php';
 require_once __DIR__ . '/../lib/PHPMailer/SMTP.php';
 require_once __DIR__ . '/../lib/PHPMailer/Exception.php';
 
-// SMTP Settings
-define('SMTP_HOST', 'mxe97d.netcup.net');
-define('SMTP_PORT', 465);
-define('SMTP_USER', 'clean-up.notice@defecttracker.uk');
-define('SMTP_PASS', 'Subaru5554346');
-define('SMTP_SECURE', 'ssl'); // SSL for port 465
-
-define('MAIL_FROM', 'clean-up.notice@defecttracker.uk');
-define('MAIL_FROM_NAME', 'Site Documents - Clean-up Notice Notification');
+// Credentials are deployment-owned and must never be committed.
+$noticeMailPrivate = __DIR__ . '/mail.local.php';
+$noticeMailConfig = is_file($noticeMailPrivate) ? require $noticeMailPrivate : [];
+if (!is_array($noticeMailConfig)) $noticeMailConfig = [];
+foreach (['SMTP_HOST','SMTP_PORT','SMTP_USER','SMTP_PASS','SMTP_SECURE','MAIL_FROM','MAIL_FROM_NAME'] as $noticeMailField) {
+    if (!defined($noticeMailField)) define($noticeMailField, $noticeMailConfig[$noticeMailField] ?? (getenv($noticeMailField) ?: ''));
+}
+define('NOTICES_MAIL_ENABLED', ($noticeMailConfig['enabled'] ?? true) === true);
 
 function send_mail($toEmails, string $subject, string $htmlBody, array $attachments = []): array {
+    if (!NOTICES_MAIL_ENABLED || SMTP_HOST === '' || SMTP_USER === '' || SMTP_PASS === '' || MAIL_FROM === '') return ['ok' => false, 'error' => 'Email is not configured for this instance.'];
     $mail = new PHPMailer(true);
     try {
         $mail->isSMTP();
